@@ -63,6 +63,9 @@ STRING     \"([^\"\\]|\\.)*\"
 "}"             { return RBRACE; }
 "["             { return LBRACKET; }
 "]"             { return RBRACKET; }
+"<"             { return LT; }
+">"             { return GT; }
+
 
 
 [ \t\r\n]+      ;         

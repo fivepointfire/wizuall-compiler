@@ -2,165 +2,154 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ir/ast.h"
 
-
-// Forward declarations
-int yylex();
-void yyerror(const char *s);
-
+ASTNode* final_ast = NULL;
 %}
 
+/* ----------  UNION  ---------- */
 %union {
     int num;
     char* str;
     struct ASTNode* ast;
+    struct ASTList* list;
 }
 
-/* --- Token Declarations --- */
-
-// Literals
+/* ----------  TOKENS ----------- */
 %token <num> NUMBER
-%token <str> STRING
 %token <str> ID
+%token <str> STRING
+%token LT GT
 
-// Keywords
 %token IF ELSE WHILE FOR
 %token BEGIN_AUX END_AUX
-
-// Built-in Vector Functions
 %token SORT REVERSE SLICE AVG TRANSPOSE RUNNING_SUM PAIRWISE_COMPARE PARETO_SET
-
-// Visualization Functions
 %token PLOT HISTOGRAM HEATMAP BARCHART PIECHART SCATTER BOXPLOT TIMELINE
-
-// Operators and Punctuation
 %token PLUS MINUS TIMES DIVIDE ASSIGN
 %token COMMA SEMICOLON
 %token LPAREN RPAREN
 %token LBRACE RBRACE
 %token LBRACKET RBRACKET
 
-/* --- Operator Precedence Rules --- */
+/* ----------  PRECEDENCE -------- */
+%left LT GT
 %left PLUS MINUS
 %left TIMES DIVIDE
 %left LBRACKET RBRACKET
 %left LPAREN RPAREN
 
-%%
+/* ----------  TYPES ------------ */
+%type <ast>  Program Statement Assignment ControlStructure FunctionCall VisualizationCall Expression Term Factor VectorLiteral VizArg
+%type <list> StatementList VectorElements ArgList ArgListOpt VizArgList VizArgListOpt
 
-/* --- Grammar Rules Start Here --- */
+%%   /* ---------- GRAMMAR ---------- */
 
 Program
-    : StatementList
+    : StatementList                { final_ast = createProgramNode($1); }
     ;
 
 StatementList
-    : Statement StatementList
-    | Statement
+    : Statement                        { $$ = createASTList($1); }          /* first stmt */
+    | StatementList Statement          { $$ = appendASTList($1, $2); }      /* append   */
     ;
 
 Statement
     : Assignment
     | ControlStructure
-    | FunctionCall
     | VisualizationCall
-    | AuxBlock
     ;
 
 Assignment
-    : ID ASSIGN Expression
+    : ID ASSIGN Expression         { $$ = createAssignmentNode($1, $3); }
     ;
 
 ControlStructure
     : IF LPAREN Expression RPAREN LBRACE StatementList RBRACE ELSE LBRACE StatementList RBRACE
+        { $$ = createIfElseNode($3, $6, $10); }
     | WHILE LPAREN Expression RPAREN LBRACE StatementList RBRACE
+        { $$ = createWhileNode($3, $6); }
     | FOR LPAREN Assignment SEMICOLON Expression SEMICOLON Assignment RPAREN LBRACE StatementList RBRACE
+        { $$ = createForNode($3, $5, $7, $10); }
     ;
 
 FunctionCall
-    : ID LPAREN ArgListOpt RPAREN
+    : ID LPAREN ArgListOpt RPAREN  { $$ = createFunctionCallNode($1, $3); }
     ;
 
 VisualizationCall
-    : PlotFunction LPAREN VizArgListOpt RPAREN
-    ;
-
-PlotFunction
-    : PLOT | HISTOGRAM | HEATMAP | BARCHART | PIECHART | SCATTER | BOXPLOT | TIMELINE
-    ;
-
-AuxBlock
-    : BEGIN_AUX AuxStatements END_AUX
-    ;
-
-AuxStatements
-    : /* TODO: can extend to read raw text inside BEGIN_AUX */
+    : PLOT      LPAREN VizArgListOpt RPAREN { $$ = createVizCallNode("plot",      $3); }
+    | HISTOGRAM LPAREN VizArgListOpt RPAREN { $$ = createVizCallNode("histogram", $3); }
+    | HEATMAP   LPAREN VizArgListOpt RPAREN { $$ = createVizCallNode("heatmap",   $3); }
+    | BARCHART  LPAREN VizArgListOpt RPAREN { $$ = createVizCallNode("barchart",  $3); }
+    | PIECHART  LPAREN VizArgListOpt RPAREN { $$ = createVizCallNode("piechart",  $3); }
+    | SCATTER   LPAREN VizArgListOpt RPAREN { $$ = createVizCallNode("scatter",   $3); }
+    | BOXPLOT   LPAREN VizArgListOpt RPAREN { $$ = createVizCallNode("boxplot",   $3); }
+    | TIMELINE  LPAREN VizArgListOpt RPAREN { $$ = createVizCallNode("timeline",  $3); }
     ;
 
 Expression
-    : Expression PLUS Term
-    | Expression MINUS Term
+    : Expression PLUS Term         { $$ = createBinaryOpNode(OP_PLUS , $1, $3); }
+    | Expression MINUS Term         { $$ = createBinaryOpNode(OP_MINUS, $1, $3); }
+    | Expression LT Term            { $$ = createBinaryOpNode(OP_LT, $1, $3); }
+    | Expression GT Term            { $$ = createBinaryOpNode(OP_GT, $1, $3); }
     | Term
     ;
 
 Term
-    : Term TIMES Factor
-    | Term DIVIDE Factor
+    : Term TIMES Factor             { $$ = createBinaryOpNode(OP_TIMES, $1, $3); }
+    | Term DIVIDE Factor            { $$ = createBinaryOpNode(OP_DIVIDE, $1, $3); }
     | Factor
     ;
 
 Factor
-    : MINUS Factor
-    | LPAREN Expression RPAREN
-    | VectorLiteral
-    | ID
-    | NUMBER
+    : NUMBER                        { $$ = createNumberNode($1); }
+    | ID                            { $$ = createIdNode($1); }
+    | VectorLiteral                 { $$ = $1; }
+    | FunctionCall                  { $$ = $1; }  /* <-- ADD THIS */
+    | LPAREN Expression RPAREN      { $$ = $2; }
     ;
 
 VectorLiteral
-    : LBRACKET VectorElementsOpt RBRACKET
+    : LBRACKET VectorElements RBRACKET { $$ = createVectorNode($2); }
     ;
 
-VectorElementsOpt
-    : VectorElements
-    | /* empty */
-    ;
-
+/* ▼▼  THE CORRECTED VECTOR-ELEMENT RULE  ▼▼ */
 VectorElements
-    : Expression
-    | Expression COMMA VectorElements
-    | VectorLiteral
-    | VectorLiteral COMMA VectorElements
+    : Expression                           { $$ = createASTList($1); }                 /* first element */
+    | VectorElements COMMA Expression      { $$ = appendASTList($1, $3); }             /* append more */
     ;
 
 ArgListOpt
-    : ArgList
-    | /* empty */
+    : ArgList                        { $$ = $1; }
+    | /* empty */                    { $$ = NULL; }
     ;
 
 ArgList
-    : Expression
-    | Expression COMMA ArgList
+    : Expression                     { $$ = createASTList($1); }
+    | ArgList COMMA Expression       { $$ = appendASTList($1, $3); }
     ;
 
 VizArgListOpt
-    : VizArgList
-    | /* empty */
+    : VizArgList                     { $$ = $1; }
+    | /* empty */                    { $$ = NULL; }
     ;
 
 VizArgList
-    : VizArg
-    | VizArg COMMA VizArgList
+    : VizArg                         { $$ = createASTList($1); }
+    | VizArgList COMMA VizArg        { $$ = appendASTList($1, $3); }
     ;
 
 VizArg
-    : Expression
-    | ID ASSIGN STRING
+    : ID ASSIGN STRING
+        {   ASTNode* key = createIdNode($1);
+            ASTNode* val = createIdNode($3);
+            $$ = createBinaryOpNode(OP_ASSIGN, key, val);
+        }
+    | Expression                     { $$ = $1; }
     ;
 
-%%
+%%  /* ----------  C code section ---------- */
 
-/* --- Error Handling --- */
 void yyerror(const char *s) {
     fprintf(stderr, "Parse error: %s\n", s);
 }

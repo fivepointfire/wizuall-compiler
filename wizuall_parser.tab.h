@@ -50,43 +50,45 @@ extern int yydebug;
   enum yytokentype
   {
     NUMBER = 258,
-    STRING = 259,
-    ID = 260,
-    IF = 261,
-    ELSE = 262,
-    WHILE = 263,
-    FOR = 264,
-    BEGIN_AUX = 265,
-    END_AUX = 266,
-    SORT = 267,
-    REVERSE = 268,
-    SLICE = 269,
-    AVG = 270,
-    TRANSPOSE = 271,
-    RUNNING_SUM = 272,
-    PAIRWISE_COMPARE = 273,
-    PARETO_SET = 274,
-    PLOT = 275,
-    HISTOGRAM = 276,
-    HEATMAP = 277,
-    BARCHART = 278,
-    PIECHART = 279,
-    SCATTER = 280,
-    BOXPLOT = 281,
-    TIMELINE = 282,
-    PLUS = 283,
-    MINUS = 284,
-    TIMES = 285,
-    DIVIDE = 286,
-    ASSIGN = 287,
-    COMMA = 288,
-    SEMICOLON = 289,
-    LPAREN = 290,
-    RPAREN = 291,
-    LBRACE = 292,
-    RBRACE = 293,
-    LBRACKET = 294,
-    RBRACKET = 295
+    ID = 259,
+    STRING = 260,
+    LT = 261,
+    GT = 262,
+    IF = 263,
+    ELSE = 264,
+    WHILE = 265,
+    FOR = 266,
+    BEGIN_AUX = 267,
+    END_AUX = 268,
+    SORT = 269,
+    REVERSE = 270,
+    SLICE = 271,
+    AVG = 272,
+    TRANSPOSE = 273,
+    RUNNING_SUM = 274,
+    PAIRWISE_COMPARE = 275,
+    PARETO_SET = 276,
+    PLOT = 277,
+    HISTOGRAM = 278,
+    HEATMAP = 279,
+    BARCHART = 280,
+    PIECHART = 281,
+    SCATTER = 282,
+    BOXPLOT = 283,
+    TIMELINE = 284,
+    PLUS = 285,
+    MINUS = 286,
+    TIMES = 287,
+    DIVIDE = 288,
+    ASSIGN = 289,
+    COMMA = 290,
+    SEMICOLON = 291,
+    LPAREN = 292,
+    RPAREN = 293,
+    LBRACE = 294,
+    RBRACE = 295,
+    LBRACKET = 296,
+    RBRACKET = 297
   };
 #endif
 
@@ -94,13 +96,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 13 "grammar/wizuall_parser.y"
+#line 11 "grammar/wizuall_parser.y"
 
     int num;
     char* str;
     struct ASTNode* ast;
+    struct ASTList* list;
 
-#line 104 "wizuall_parser.tab.h"
+#line 107 "wizuall_parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
