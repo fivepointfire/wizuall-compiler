@@ -10,6 +10,9 @@ static bool numpy_imported = false;
 static bool paretoset_emitted = false;
 static bool pairwise_emitted = false;
 
+// Add at the top of the file (after includes):
+static int plot_counter = 1;
+
 // Forward declarations
 void generate_code(ASTNode* node, FILE* out, int indent);
 void generate_expr(ASTNode* node, FILE* out, int indent);
@@ -84,8 +87,14 @@ void scan_for_imports_and_helpers(ASTNode* node) {
 }
 
 void emit_imports(FILE* out) {
-    if (matplotlib_imported) fprintf(out, "import matplotlib.pyplot as plt\n");
+    // Always suppress matplotlib UserWarnings at the very top
+    fprintf(out, "import warnings\nwarnings.filterwarnings(\"ignore\", category=UserWarning, module=\"matplotlib\")\n");
+    if (matplotlib_imported) {
+        fprintf(out, "import matplotlib.pyplot as plt\n");
+    }
     if (numpy_imported) fprintf(out, "import numpy as np\n");
+    // Ensure plot_counter is defined before use
+    fprintf(out, "plot_counter = 1\n");
 }
 
 void emit_helpers(FILE* out) {
@@ -327,7 +336,11 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
         }
         
         print_indent(out, indent);
-        fprintf(out, "plt.show()\n");
+        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        print_indent(out, indent);
+        fprintf(out, "plot_counter += 1\n");
+        print_indent(out, indent);
+        fprintf(out, "plt.clf()\n");
     } else if (streq(func, "histogram")) {
         // Histogram visualization with extended parameters
         fprintf(out, "plt.hist(");
@@ -429,7 +442,11 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
         }
         
         print_indent(out, indent);
-        fprintf(out, "plt.show()\n");
+        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        print_indent(out, indent);
+        fprintf(out, "plot_counter += 1\n");
+        print_indent(out, indent);
+        fprintf(out, "plt.clf()\n");
     } else if (streq(func, "heatmap")) {
         // Heatmap visualization with extended parameters
         fprintf(out, "plt.imshow(");
@@ -525,7 +542,11 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
         }
         
         print_indent(out, indent);
-        fprintf(out, "plt.show()\n");
+        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        print_indent(out, indent);
+        fprintf(out, "plot_counter += 1\n");
+        print_indent(out, indent);
+        fprintf(out, "plt.clf()\n");
     } else if (streq(func, "barchart")) {
         // Bar chart visualization with extended parameters
         fprintf(out, "plt.bar(");
@@ -608,7 +629,11 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
         }
         
         print_indent(out, indent);
-        fprintf(out, "plt.show()\n");
+        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        print_indent(out, indent);
+        fprintf(out, "plot_counter += 1\n");
+        print_indent(out, indent);
+        fprintf(out, "plt.clf()\n");
     } else if (streq(func, "piechart")) {
         // Pie chart visualization with only values and labels
         fprintf(out, "plt.pie(");
@@ -651,7 +676,11 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
             fprintf(out, "plt.title('Pie Chart')\n");
         }
         print_indent(out, indent);
-        fprintf(out, "plt.show()\n");
+        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        print_indent(out, indent);
+        fprintf(out, "plot_counter += 1\n");
+        print_indent(out, indent);
+        fprintf(out, "plt.clf()\n");
     } else if (streq(func, "scatter")) {
         // Scatter plot visualization with extended parameters
         fprintf(out, "plt.scatter(");
@@ -741,7 +770,11 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
         }
         
         print_indent(out, indent);
-        fprintf(out, "plt.show()\n");
+        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        print_indent(out, indent);
+        fprintf(out, "plot_counter += 1\n");
+        print_indent(out, indent);
+        fprintf(out, "plt.clf()\n");
     } else if (streq(func, "boxplot")) {
         // Box plot visualization with extended parameters
         fprintf(out, "plt.boxplot(");
@@ -849,7 +882,11 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
         }
         
         print_indent(out, indent);
-        fprintf(out, "plt.show()\n");
+        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        print_indent(out, indent);
+        fprintf(out, "plot_counter += 1\n");
+        print_indent(out, indent);
+        fprintf(out, "plt.clf()\n");
     } else if (streq(func, "timeline")) {
         // Timeline visualization with extended parameters
         fprintf(out, "plt.plot(");
@@ -944,7 +981,11 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
         }
         
         print_indent(out, indent);
-        fprintf(out, "plt.show()\n");
+        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        print_indent(out, indent);
+        fprintf(out, "plot_counter += 1\n");
+        print_indent(out, indent);
+        fprintf(out, "plt.clf()\n");
     } else {
         fprintf(out, "# Unknown visualization: %s\n", func);
     }

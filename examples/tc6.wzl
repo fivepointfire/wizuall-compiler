@@ -1,0 +1,16 @@
+x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+y = [2.5, 4, 5.5, 4, 5, 6, 7, 8, 9, 10.5];
+z = [3, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+
+
+// Pie chart
+values = [4.0, 2.5, 2, 10];
+labels = ["Apples", "Bananas", "Cherries", "Dates"];
+piechart(values, labels=labels);
+
+// Scatter plot
+scatter(x, y, title="Scatter Example", xlabel="X", ylabel="Y");
+
+// Box plot
+t_labels = ["hello","World","May"];
+boxplot([x, y, z], title="Box Plot Example", xlabel="Groups", ylabel="Values" ,tick_labels = t_labels);

@@ -1,6 +1,0 @@
-// Example: Pie chart with values and labels
-
-values = [4.012, 2.5, 2, 100.5];
-labels = ["Apples", "Bananas", "Cherries", "Dates"];
-
-piechart(values, labels=labels);

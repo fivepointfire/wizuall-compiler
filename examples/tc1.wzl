@@ -1,0 +1,16 @@
+// Test math and vector functions
+
+a = [1, 2, 3, 4, 5];
+b = [10, 20, 30, 40, 50];
+
+sum_a = avg(a) + avg(b);
+sorted_b = sort(b);
+reversed_a = reverse(a);
+sliced_b = slice(b, 1, 4); // should be [20, 30, 40]
+transposed = transpose([[1, 2], [3, 4]]);
+
+print("sum_a:", sum_a);
+print("sorted_b:", sorted_b);
+print("reversed_a:", reversed_a);
+print("sliced_b:", sliced_b);
+print("transposed:", transposed);
