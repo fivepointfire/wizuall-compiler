@@ -100,6 +100,13 @@ ASTNode* createAuxBlockNode(char* code) {
     return node;
 }
 
+ASTNode* createStringNode(char* value) {
+    ASTNode* node = malloc(sizeof(ASTNode));
+    node->type = NODE_STRING;
+    node->id_name = strdup(value); // reuse id_name for string value
+    return node;
+}
+
 // List creation functions
 
 ASTList* createASTList(ASTNode* node) {

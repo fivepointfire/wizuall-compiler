@@ -9,6 +9,7 @@ typedef enum {
     NODE_VECTOR_LITERAL,
     NODE_NUMBER,
     NODE_ID,
+    NODE_STRING,
     NODE_FUNCTION_CALL,
     NODE_VIZ_CALL,
     NODE_IF_ELSE,
@@ -105,6 +106,7 @@ ASTNode* createBinaryOpNode(BinaryOpType op, ASTNode* left, ASTNode* right);
 ASTNode* createVectorNode(ASTList* elements);
 ASTNode* createNumberNode(double value);
 ASTNode* createIdNode(char* name);
+ASTNode* createStringNode(char* value);
 ASTNode* createFunctionCallNode(char* name, ASTList* args);
 ASTNode* createVizCallNode(char* name, ASTList* args);
 ASTNode* createIfElseNode(ASTNode* cond, ASTList* if_body, ASTList* else_body);

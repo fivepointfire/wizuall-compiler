@@ -109,8 +109,9 @@ Term
 Factor
     : NUMBER                        { $$ = createNumberNode($1); }
     | ID                            { $$ = createIdNode($1); }
+    | STRING                        { $$ = createStringNode($1); }
     | VectorLiteral                 { $$ = $1; }
-    | FunctionCall                  { $$ = $1; }  /* <-- ADD THIS */
+    | FunctionCall                  { $$ = $1; }
     | LPAREN Expression RPAREN      { $$ = $2; }
     ;
 
@@ -147,7 +148,7 @@ VizArgList
 VizArg
     : ID ASSIGN STRING
         {   ASTNode* key = createIdNode($1);
-            ASTNode* val = createIdNode($3);
+            ASTNode* val = createStringNode($3);
             $$ = createBinaryOpNode(OP_ASSIGN, key, val);
         }
     | Expression                     { $$ = $1; }
@@ -160,3 +161,4 @@ void yyerror(const char *s) {
     extern int yylineno, yycolumn;
     fprintf(stderr, "Parse error: %s at '%s' (line %d, column %d)\n", s, yytext, yylineno, yycolumn);
 }
+    
