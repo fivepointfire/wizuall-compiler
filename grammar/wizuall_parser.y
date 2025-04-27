@@ -5,6 +5,10 @@
 #include "ir/ast.h"
 
 ASTNode* final_ast = NULL;
+
+// Add externs for line/column tracking
+extern int yylineno;
+extern int yycolumn;
 %}
 
 /* ----------  UNION  ---------- */
@@ -35,8 +39,8 @@ ASTNode* final_ast = NULL;
 %left LT GT
 %left PLUS MINUS
 %left TIMES DIVIDE
+%nonassoc LPAREN RPAREN  /* Make function calls non-associative */
 %left LBRACKET RBRACKET
-%left LPAREN RPAREN
 
 /* ----------  TYPES ------------ */
 %type <ast>  Program Statement Assignment ControlStructure FunctionCall VisualizationCall Expression Term Factor VectorLiteral VizArg
@@ -54,9 +58,10 @@ StatementList
     ;
 
 Statement
-    : Assignment
+    : Assignment SEMICOLON
     | ControlStructure
-    | VisualizationCall
+    | VisualizationCall SEMICOLON
+    | FunctionCall SEMICOLON
     ;
 
 Assignment
@@ -151,5 +156,7 @@ VizArg
 %%  /* ----------  C code section ---------- */
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Parse error: %s\n", s);
+    extern char* yytext;
+    extern int yylineno, yycolumn;
+    fprintf(stderr, "Parse error: %s at '%s' (line %d, column %d)\n", s, yytext, yylineno, yycolumn);
 }

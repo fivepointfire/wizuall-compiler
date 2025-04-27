@@ -6,6 +6,9 @@
 
 // Declare yylval properly
 extern YYSTYPE yylval;
+
+// Add line and column tracking
+int yycolumn = 1;
 %}
 
 DIGIT      [0-9]
@@ -16,23 +19,15 @@ STRING     \"([^\"\\]|\\.)*\"
 
 %%
 
+\n              { yylineno++; yycolumn = 1; }
+[ \t\r]+        { yycolumn += yyleng; }
 
-"if"            { return IF; }
-"else"          { return ELSE; }
-"while"         { return WHILE; }
-"for"           { return FOR; }
-"BEGIN_AUX"     { return BEGIN_AUX; }
-"END_AUX"       { return END_AUX; }
-
-
-"sort"          { return SORT; }
-"reverse"       { return REVERSE; }
-"slice"         { return SLICE; }
-"avg"           { return AVG; }
-"transpose"     { return TRANSPOSE; }
-"runningSum"    { return RUNNING_SUM; }
-"pairwiseCompare" { return PAIRWISE_COMPARE; }
-"paretoSet"     { return PARETO_SET; }
+"if"            { yycolumn += yyleng; return IF; }
+"else"          { yycolumn += yyleng; return ELSE; }
+"while"         { yycolumn += yyleng; return WHILE; }
+"for"           { yycolumn += yyleng; return FOR; }
+"BEGIN_AUX"     { yycolumn += yyleng; return BEGIN_AUX; }
+"END_AUX"       { yycolumn += yyleng; return END_AUX; }
 
 
 "plot"          { return PLOT; }
@@ -44,35 +39,30 @@ STRING     \"([^\"\\]|\\.)*\"
 "boxplot"       { return BOXPLOT; }
 "timeline"      { return TIMELINE; }
 
+{ID}            { yylval.str = strdup(yytext); yycolumn += yyleng; return ID; }
+{NUMBER}        { yylval.num = atof(yytext); yycolumn += yyleng; return NUMBER; }
+{STRING}        { yylval.str = strdup(yytext); yycolumn += yyleng; return STRING; }
 
-{ID}            { yylval.str = strdup(yytext); return ID; }
-{NUMBER}        { yylval.num = atof(yytext); return NUMBER; }
-{STRING}        { yylval.str = strdup(yytext); return STRING; }
-
-
-"+"             { return PLUS; }
-"-"             { return MINUS; }
-"*"             { return TIMES; }
-"/"             { return DIVIDE; }
-"="             { return ASSIGN; }
-","             { return COMMA; }
-";"             { return SEMICOLON; }
-"("             { return LPAREN; }
-")"             { return RPAREN; }
-"{"             { return LBRACE; }
-"}"             { return RBRACE; }
-"["             { return LBRACKET; }
-"]"             { return RBRACKET; }
-"<"             { return LT; }
-">"             { return GT; }
-
-
+"+"             { yycolumn += yyleng; return PLUS; }
+"-"             { yycolumn += yyleng; return MINUS; }
+"*"             { yycolumn += yyleng; return TIMES; }
+"/"             { yycolumn += yyleng; return DIVIDE; }
+"="             { yycolumn += yyleng; return ASSIGN; }
+","             { yycolumn += yyleng; return COMMA; }
+";"             { yycolumn += yyleng; return SEMICOLON; }
+"("             { yycolumn += yyleng; return LPAREN; }
+")"             { yycolumn += yyleng; return RPAREN; }
+"{"             { yycolumn += yyleng; return LBRACE; }
+"}"             { yycolumn += yyleng; return RBRACE; }
+"["             { yycolumn += yyleng; return LBRACKET; }
+"]"             { yycolumn += yyleng; return RBRACKET; }
+"<"             { yycolumn += yyleng; return LT; }
+">"             { yycolumn += yyleng; return GT; }
 
 [ \t\r\n]+      ;         
 "//".*          ;          
 
-
-.               { /* Skip any unknown single characters */ }
+.               { yycolumn += yyleng; /* Skip any unknown single characters */ }
 
 %%
 
