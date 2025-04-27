@@ -1,40 +1,35 @@
-// Data setup
-x = [1, 2, 3, 4, 5];
-y = [2, 4, 6, 8, 10];
+// Example: All Visualizations Test
+// Data for line, scatter, bar, box, etc.
+x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+y = [2.5, 4, 5.5, 4, 5, 6, 7, 8, 9, 10.5];
+z = [3, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+k = slice(x,3,7);
+print(k);
+// Line plot
+plot(x, y, title="Line Plot", xlabel="X Axis", ylabel="Y Axis");
 
-x_sorted = sort(x);
-y_reversed = reverse(y);
-y_avg = avg(y);
-z = x + y;
+// Histogram
+histogram(y, title="Histogram Example", xlabel="Value", ylabel="Frequency");
 
-// Visualization with all options
-plot(x, y, title = "Line Plot", xlabel = "X Axis", ylabel = "Y Axis", color = "blue");
+// Heatmap
+matrix = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+];
+heatmap(matrix, title="Heatmap Example", xlabel="X", ylabel="Y");
 
-// Histogram with bins and color
-histogram(y, title = "Histogram of y", bins = 5, color = "green");
+// Bar chart
+barchart(x, y, title="Bar Chart Example", xlabel="Categories", ylabel="Values");
 
-// Pairwise comparison and running sum
-diffs = pairwiseCompare(x);
-cumsum = runningSum(y);
+// Pie chart
+values = [4.0, 2.5, 2, 10];
+labels = ["Apples", "Bananas", "Cherries", "Dates"];
+piechart(values, labels=labels);
 
-// Heatmap (requires 2D data)
-matrix = [[1,2,3],[4,5,6],[7,8,9]];
-heatmap(matrix, title = "Heatmap Example");
+// Scatter plot
+scatter(x, y, title="Scatter Example", xlabel="X", ylabel="Y");
 
-// Pie chart with labels and colors
-values = [10, 20, 30];
-labels = ["A", "B", "C"];
-colors = ["red", "green", "blue"];
-piechart(values, title = "Pie Example", labels = labels, colors = colors);
-
-// For loop and if-else
-for (i = 0; i < 3; i = i + 1) {
-    x = x + 1;
-    y = y + 2;
-}
-
-if (y_avg > 5) {
-    plot(x, y, title = "y_avg > 5", color = "purple");
-} else {
-    plot(x, y, title = "y_avg <= 5", color = "orange");
-}
+// Box plot
+t_labels = ["hello","World","May"];
+boxplot([x, y, z], title="Box Plot Example", xlabel="Groups", ylabel="Values" ,tick_labels = t_labels);

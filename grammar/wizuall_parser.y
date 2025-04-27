@@ -13,7 +13,7 @@ extern int yycolumn;
 
 /* ----------  UNION  ---------- */
 %union {
-    int num;
+    double num;
     char* str;
     struct ASTNode* ast;
     struct ASTList* list;
@@ -150,6 +150,10 @@ VizArg
         {   ASTNode* key = createIdNode($1);
             ASTNode* val = createStringNode($3);
             $$ = createBinaryOpNode(OP_ASSIGN, key, val);
+        }
+    | ID ASSIGN Expression
+        {   ASTNode* key = createIdNode($1);
+            $$ = createBinaryOpNode(OP_ASSIGN, key, $3);
         }
     | Expression                     { $$ = $1; }
     ;

@@ -98,7 +98,7 @@ union YYSTYPE
 {
 #line 15 "grammar/wizuall_parser.y"
 
-    int num;
+    double num;
     char* str;
     struct ASTNode* ast;
     struct ASTList* list;

@@ -14,7 +14,7 @@ int yycolumn = 1;
 DIGIT      [0-9]
 LETTER     [a-zA-Z_]
 ID         {LETTER}({LETTER}|{DIGIT})*
-NUMBER     {DIGIT}+(\.{DIGIT}+)?
+NUMBER     {DIGIT}+\.{DIGIT}+|{DIGIT}+
 STRING     \"([^\"\\]|\\.)*\"
 
 %%

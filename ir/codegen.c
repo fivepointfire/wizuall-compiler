@@ -192,188 +192,759 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
     ASTNode* kw_keys[10];  ASTNode* kw_vals[10]; int kw_count = 0;
     split_viz_args(args, pos_args, &pos_count, kw_keys, kw_vals, &kw_count);
     print_indent(out, indent);
-    if (streq(func, "plot")) {
-        fprintf(out, "plt.plot(");
-        for (int i = 0; i < pos_count; ++i) {
+    
+    // Helper function to generate positional arguments
+    void generate_pos_args(int count) {
+        for (int i = 0; i < count; ++i) {
             if (i > 0) fprintf(out, ", ");
             generate_expr(pos_args[i], out, indent);
         }
+    }
+    
+    // Helper function to generate keyword arguments
+    void generate_kw_args(const char* key, ASTNode* val, bool is_first) {
+        if (!is_first) fprintf(out, ", ");
+        fprintf(out, "%s=", key);
+        generate_expr(val, out, indent);
+    }
+    
+    if (streq(func, "plot")) {
+        // Plot visualization with extended parameters
+        fprintf(out, "plt.plot(");
+        
+        // Generate positional arguments first
+        generate_pos_args(pos_count);
+        
+        // Add keyword arguments
+        bool has_color = false, has_label = false, has_linestyle = false, 
+             has_marker = false, has_markersize = false, has_linewidth = false;
+        
+        bool first_kw = true;
         for (int i = 0; i < kw_count; ++i) {
             const char* key = kw_keys[i]->id_name;
-            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel")) continue;
-            fprintf(out, "%s=", key);
-            generate_expr(kw_vals[i], out, indent);
-            if (i < kw_count - 1) fprintf(out, ", ");
+            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel") || 
+                streq(key, "grid") || streq(key, "legend")) continue;
+            
+            if (streq(key, "color")) has_color = true;
+            if (streq(key, "label")) has_label = true;
+            if (streq(key, "linestyle")) has_linestyle = true;
+            if (streq(key, "marker")) has_marker = true;
+            if (streq(key, "markersize")) has_markersize = true;
+            if (streq(key, "linewidth")) has_linewidth = true;
+            
+            // Add comma before first keyword arg only if we had positional args
+            if (first_kw && pos_count > 0) fprintf(out, ", ");
+            generate_kw_args(key, kw_vals[i], first_kw);
+            first_kw = false;
         }
+        
+        // Add default values if not provided
+        if (!has_color) {
+            if (!first_kw || pos_count > 0) fprintf(out, ", ");
+            fprintf(out, "color='blue'");
+            first_kw = false;
+        }
+        if (!has_linestyle) {
+            if (!first_kw || pos_count > 0) fprintf(out, ", ");
+            fprintf(out, "linestyle='-'");
+            first_kw = false;
+        }
+        if (!has_marker) {
+            if (!first_kw || pos_count > 0) fprintf(out, ", ");
+            fprintf(out, "marker=''");
+            first_kw = false;
+        }
+        if (!has_markersize) {
+            if (!first_kw || pos_count > 0) fprintf(out, ", ");
+            fprintf(out, "markersize=5");
+            first_kw = false;
+        }
+        if (!has_linewidth) {
+            if (!first_kw || pos_count > 0) fprintf(out, ", ");
+            fprintf(out, "linewidth=2");
+        }
+        
         fprintf(out, ")\n");
+        
+        // Add title, labels, grid, and legend
+        bool has_title = false, has_xlabel = false, has_ylabel = false, has_grid = false, has_legend = false;
+        
         for (int i = 0; i < kw_count; ++i) {
             const char* key = kw_keys[i]->id_name;
-            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel")) {
+            if (streq(key, "title")) {
+                has_title = true;
                 print_indent(out, indent);
-                fprintf(out, "plt.%s(", key);
+                fprintf(out, "plt.title(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "xlabel")) {
+                has_xlabel = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.xlabel(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "ylabel")) {
+                has_ylabel = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.ylabel(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "grid")) {
+                has_grid = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.grid(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "legend")) {
+                has_legend = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.legend(");
                 generate_expr(kw_vals[i], out, indent);
                 fprintf(out, ")\n");
             }
         }
+        
+        // Add default values if not provided
+        if (!has_title) {
+            print_indent(out, indent);
+            fprintf(out, "plt.title('Plot')\n");
+        }
+        if (!has_xlabel) {
+            print_indent(out, indent);
+            fprintf(out, "plt.xlabel('X-axis')\n");
+        }
+        if (!has_ylabel) {
+            print_indent(out, indent);
+            fprintf(out, "plt.ylabel('Y-axis')\n");
+        }
+        if (!has_grid) {
+            print_indent(out, indent);
+            fprintf(out, "plt.grid(True)\n");
+        }
+        if (!has_legend && has_label) {
+            print_indent(out, indent);
+            fprintf(out, "plt.legend()\n");
+        }
+        
         print_indent(out, indent);
         fprintf(out, "plt.show()\n");
     } else if (streq(func, "histogram")) {
+        // Histogram visualization with extended parameters
         fprintf(out, "plt.hist(");
-        for (int i = 0; i < pos_count; ++i) {
-            if (i > 0) fprintf(out, ", ");
-            generate_expr(pos_args[i], out, indent);
-        }
+        
+        // Generate positional arguments first
+        generate_pos_args(pos_count);
+        
+        // Add keyword arguments
+        bool has_bins = false, has_color = false, has_edgecolor = false, has_density = false;
+        
+        bool first_kw = true;
         for (int i = 0; i < kw_count; ++i) {
             const char* key = kw_keys[i]->id_name;
-            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel")) continue;
-            fprintf(out, "%s=", key);
-            generate_expr(kw_vals[i], out, indent);
-            if (i < kw_count - 1) fprintf(out, ", ");
+            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel") || 
+                streq(key, "grid")) continue;
+            
+            if (streq(key, "bins")) has_bins = true;
+            if (streq(key, "color")) has_color = true;
+            if (streq(key, "edgecolor")) has_edgecolor = true;
+            if (streq(key, "density")) has_density = true;
+            
+            // Add comma before first keyword arg only if we had positional args
+            if (first_kw && pos_count > 0) fprintf(out, ", ");
+            generate_kw_args(key, kw_vals[i], first_kw);
+            first_kw = false;
         }
+        
+        // Add default values if not provided
+        if (!has_bins) {
+            if (!first_kw || pos_count > 0) fprintf(out, ", ");
+            fprintf(out, "bins=10");
+            first_kw = false;
+        }
+        if (!has_color) {
+            if (!first_kw || pos_count > 0) fprintf(out, ", ");
+            fprintf(out, "color='skyblue'");
+            first_kw = false;
+        }
+        if (!has_edgecolor) {
+            if (!first_kw || pos_count > 0) fprintf(out, ", ");
+            fprintf(out, "edgecolor='black'");
+            first_kw = false;
+        }
+        if (!has_density) {
+            if (!first_kw || pos_count > 0) fprintf(out, ", ");
+            fprintf(out, "density=False");
+        }
+        
         fprintf(out, ")\n");
+        
+        // Add title, labels, and grid
+        bool has_title = false, has_xlabel = false, has_ylabel = false, has_grid = false;
+        
         for (int i = 0; i < kw_count; ++i) {
             const char* key = kw_keys[i]->id_name;
-            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel")) {
+            if (streq(key, "title")) {
+                has_title = true;
                 print_indent(out, indent);
-                fprintf(out, "plt.%s(", key);
+                fprintf(out, "plt.title(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "xlabel")) {
+                has_xlabel = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.xlabel(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "ylabel")) {
+                has_ylabel = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.ylabel(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "grid")) {
+                has_grid = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.grid(");
                 generate_expr(kw_vals[i], out, indent);
                 fprintf(out, ")\n");
             }
         }
+        
+        // Add default values if not provided
+        if (!has_title) {
+            print_indent(out, indent);
+            fprintf(out, "plt.title('Histogram')\n");
+        }
+        if (!has_xlabel) {
+            print_indent(out, indent);
+            fprintf(out, "plt.xlabel('Value')\n");
+        }
+        if (!has_ylabel) {
+            print_indent(out, indent);
+            fprintf(out, "plt.ylabel('Frequency')\n");
+        }
+        if (!has_grid) {
+            print_indent(out, indent);
+            fprintf(out, "plt.grid(True)\n");
+        }
+        
         print_indent(out, indent);
         fprintf(out, "plt.show()\n");
-    } else if (streq(func, "scatter")) {
-        fprintf(out, "plt.scatter(");
-        for (int i = 0; i < pos_count; ++i) {
-            if (i > 0) fprintf(out, ", ");
-            generate_expr(pos_args[i], out, indent);
-        }
+    } else if (streq(func, "heatmap")) {
+        // Heatmap visualization with extended parameters
+        fprintf(out, "plt.imshow(");
+        
+        // Generate positional arguments first
+        generate_pos_args(pos_count);
+        
+        // Add keyword arguments
+        bool has_cmap = false, has_interpolation = false, has_aspect = false;
+        bool first_kw = true;
+        
         for (int i = 0; i < kw_count; ++i) {
             const char* key = kw_keys[i]->id_name;
-            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel")) continue;
-            fprintf(out, "%s=", key);
-            generate_expr(kw_vals[i], out, indent);
-            if (i < kw_count - 1) fprintf(out, ", ");
+            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel") || 
+                streq(key, "colorbar")) continue;
+            
+            if (streq(key, "cmap")) has_cmap = true;
+            if (streq(key, "interpolation")) has_interpolation = true;
+            if (streq(key, "aspect")) has_aspect = true;
+            
+            // Add comma before first keyword arg only if we had positional args
+            if (first_kw && pos_count > 0) fprintf(out, ", ");
+            generate_kw_args(key, kw_vals[i], first_kw);
+            first_kw = false;
         }
+        
+        // Add default values if not provided
+        if (!has_cmap) {
+            if (!first_kw || pos_count > 0) fprintf(out, ", ");
+            fprintf(out, "cmap='viridis'");
+            first_kw = false;
+        }
+        if (!has_interpolation) {
+            if (!first_kw || pos_count > 0) fprintf(out, ", ");
+            fprintf(out, "interpolation='nearest'");
+            first_kw = false;
+        }
+        if (!has_aspect) {
+            if (!first_kw || pos_count > 0) fprintf(out, ", ");
+            fprintf(out, "aspect='auto'");
+        }
+        
         fprintf(out, ")\n");
+        
+        // Add title, labels, and colorbar
+        bool has_title = false, has_xlabel = false, has_ylabel = false, has_colorbar = false;
+        
         for (int i = 0; i < kw_count; ++i) {
             const char* key = kw_keys[i]->id_name;
-            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel")) {
+            if (streq(key, "title")) {
+                has_title = true;
                 print_indent(out, indent);
-                fprintf(out, "plt.%s(", key);
+                fprintf(out, "plt.title(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "xlabel")) {
+                has_xlabel = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.xlabel(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "ylabel")) {
+                has_ylabel = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.ylabel(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "colorbar")) {
+                has_colorbar = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.colorbar(");
                 generate_expr(kw_vals[i], out, indent);
                 fprintf(out, ")\n");
             }
         }
+        
+        // Add default values if not provided
+        if (!has_title) {
+            print_indent(out, indent);
+            fprintf(out, "plt.title('Heatmap')\n");
+        }
+        if (!has_xlabel) {
+            print_indent(out, indent);
+            fprintf(out, "plt.xlabel('X-axis')\n");
+        }
+        if (!has_ylabel) {
+            print_indent(out, indent);
+            fprintf(out, "plt.ylabel('Y-axis')\n");
+        }
+        if (!has_colorbar) {
+            print_indent(out, indent);
+            fprintf(out, "plt.colorbar()\n");
+        }
+        
         print_indent(out, indent);
         fprintf(out, "plt.show()\n");
     } else if (streq(func, "barchart")) {
+        // Bar chart visualization with extended parameters
         fprintf(out, "plt.bar(");
         for (int i = 0; i < pos_count; ++i) {
             if (i > 0) fprintf(out, ", ");
             generate_expr(pos_args[i], out, indent);
         }
+        // Only add a comma if there is at least one keyword argument to emit
+        bool has_kwarg = false;
+        bool has_color = false;
         for (int i = 0; i < kw_count; ++i) {
             const char* key = kw_keys[i]->id_name;
-            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel")) continue;
+            if (!(streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel") || streq(key, "grid"))) {
+                has_kwarg = true;
+            }
+            if (streq(key, "color")) has_color = true;
+        }
+        if (has_kwarg) {
+            fprintf(out, ", ");
+        }
+        for (int i = 0; i < kw_count; ++i) {
+            const char* key = kw_keys[i]->id_name;
+            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel") || streq(key, "grid")) continue;
             fprintf(out, "%s=", key);
             generate_expr(kw_vals[i], out, indent);
             if (i < kw_count - 1) fprintf(out, ", ");
         }
+        // Add default values if not provided
+        if (!has_color) fprintf(out, ", color='orange'");
         fprintf(out, ")\n");
+        
+        // Add title, labels, and grid
+        bool has_title = false, has_xlabel = false, has_ylabel = false, has_grid = false;
+        
         for (int i = 0; i < kw_count; ++i) {
             const char* key = kw_keys[i]->id_name;
-            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel")) {
+            if (streq(key, "title")) {
+                has_title = true;
                 print_indent(out, indent);
-                fprintf(out, "plt.%s(", key);
+                fprintf(out, "plt.title(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "xlabel")) {
+                has_xlabel = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.xlabel(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "ylabel")) {
+                has_ylabel = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.ylabel(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "grid")) {
+                has_grid = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.grid(");
                 generate_expr(kw_vals[i], out, indent);
                 fprintf(out, ")\n");
             }
         }
-        print_indent(out, indent);
-        fprintf(out, "plt.show()\n");
-    } else if (streq(func, "boxplot")) {
-        fprintf(out, "plt.boxplot(");
-        for (int i = 0; i < pos_count; ++i) {
-            if (i > 0) fprintf(out, ", ");
-            generate_expr(pos_args[i], out, indent);
+        
+        // Add default values if not provided
+        if (!has_title) {
+            print_indent(out, indent);
+            fprintf(out, "plt.title('Bar Chart')\n");
         }
-        for (int i = 0; i < kw_count; ++i) {
-            const char* key = kw_keys[i]->id_name;
-            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel")) continue;
-            fprintf(out, "%s=", key);
-            generate_expr(kw_vals[i], out, indent);
-            if (i < kw_count - 1) fprintf(out, ", ");
+        if (!has_xlabel) {
+            print_indent(out, indent);
+            fprintf(out, "plt.xlabel('Categories')\n");
         }
-        fprintf(out, ")\n");
-        for (int i = 0; i < kw_count; ++i) {
-            const char* key = kw_keys[i]->id_name;
-            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel")) {
-                print_indent(out, indent);
-                fprintf(out, "plt.%s(", key);
-                generate_expr(kw_vals[i], out, indent);
-                fprintf(out, ")\n");
-            }
+        if (!has_ylabel) {
+            print_indent(out, indent);
+            fprintf(out, "plt.ylabel('Values')\n");
         }
-        print_indent(out, indent);
-        fprintf(out, "plt.show()\n");
-    } else if (streq(func, "heatmap")) {
-        fprintf(out, "plt.imshow(");
-        for (int i = 0; i < pos_count; ++i) {
-            if (i > 0) fprintf(out, ", ");
-            generate_expr(pos_args[i], out, indent);
+        if (!has_grid) {
+            print_indent(out, indent);
+            fprintf(out, "plt.grid(axis='y')\n");
         }
-        bool has_cmap = false;
-        for (int i = 0; i < kw_count; ++i) {
-            const char* key = kw_keys[i]->id_name;
-            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel")) continue;
-            if (streq(key, "cmap")) has_cmap = true;
-            fprintf(out, ", %s=", key);
-            generate_expr(kw_vals[i], out, indent);
-        }
-        fprintf(out, ", aspect='auto'");
-        if (!has_cmap) fprintf(out, ", cmap='viridis'");
-        fprintf(out, ")\n");
-        for (int i = 0; i < kw_count; ++i) {
-            const char* key = kw_keys[i]->id_name;
-            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel")) {
-                print_indent(out, indent);
-                fprintf(out, "plt.%s(", key);
-                generate_expr(kw_vals[i], out, indent);
-                fprintf(out, ")\n");
-            }
-        }
-        print_indent(out, indent);
-        fprintf(out, "plt.colorbar()\n");
+        
         print_indent(out, indent);
         fprintf(out, "plt.show()\n");
     } else if (streq(func, "piechart")) {
+        // Pie chart visualization with only values and labels
         fprintf(out, "plt.pie(");
         for (int i = 0; i < pos_count; ++i) {
             if (i > 0) fprintf(out, ", ");
             generate_expr(pos_args[i], out, indent);
         }
+        // Only add a comma if there is at least one keyword argument to emit
+        bool has_labels = false;
         for (int i = 0; i < kw_count; ++i) {
             const char* key = kw_keys[i]->id_name;
-            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel")) continue;
-            fprintf(out, "%s=", key);
-            generate_expr(kw_vals[i], out, indent);
-            if (i < kw_count - 1) fprintf(out, ", ");
+            if (streq(key, "labels")) {
+                has_labels = true;
+                break;
+            }
+        }
+        if (has_labels && pos_count > 0) fprintf(out, ", ");
+        for (int i = 0; i < kw_count; ++i) {
+            const char* key = kw_keys[i]->id_name;
+            if (streq(key, "labels")) {
+                fprintf(out, "labels=");
+                generate_expr(kw_vals[i], out, indent);
+            }
         }
         fprintf(out, ")\n");
+        // Add title if provided
+        bool has_title = false;
         for (int i = 0; i < kw_count; ++i) {
             const char* key = kw_keys[i]->id_name;
-            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel")) {
+            if (streq(key, "title")) {
+                has_title = true;
                 print_indent(out, indent);
-                fprintf(out, "plt.%s(", key);
+                fprintf(out, "plt.title(");
                 generate_expr(kw_vals[i], out, indent);
                 fprintf(out, ")\n");
             }
         }
+        if (!has_title) {
+            print_indent(out, indent);
+            fprintf(out, "plt.title('Pie Chart')\n");
+        }
+        print_indent(out, indent);
+        fprintf(out, "plt.show()\n");
+    } else if (streq(func, "scatter")) {
+        // Scatter plot visualization with extended parameters
+        fprintf(out, "plt.scatter(");
+        for (int i = 0; i < pos_count; ++i) {
+            if (i > 0) fprintf(out, ", ");
+            generate_expr(pos_args[i], out, indent);
+        }
+        // Only add a comma if there is at least one keyword argument to emit
+        bool has_scatter_kwarg = false;
+        bool has_color = false, has_marker = false, has_size = false, has_alpha = false;
+        for (int i = 0; i < kw_count; ++i) {
+            const char* key = kw_keys[i]->id_name;
+            if (!(streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel") || streq(key, "grid"))) {
+                has_scatter_kwarg = true;
+            }
+            if (streq(key, "color")) has_color = true;
+            if (streq(key, "marker")) has_marker = true;
+            if (streq(key, "s")) has_size = true;
+            if (streq(key, "alpha")) has_alpha = true;
+        }
+        if (has_scatter_kwarg) {
+            fprintf(out, ", ");
+        }
+        for (int i = 0; i < kw_count; ++i) {
+            const char* key = kw_keys[i]->id_name;
+            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel") || streq(key, "grid")) continue;
+            fprintf(out, "%s=", key);
+            generate_expr(kw_vals[i], out, indent);
+            if (i < kw_count - 1) fprintf(out, ", ");
+        }
+        // Add default values if not provided
+        if (!has_color) fprintf(out, ", color='blue'");
+        if (!has_marker) fprintf(out, ", marker='o'");
+        if (!has_size) fprintf(out, ", s=100");
+        if (!has_alpha) fprintf(out, ", alpha=0.6");
+        
+        fprintf(out, ")\n");
+        
+        // Add title, labels, and grid
+        bool has_title = false, has_xlabel = false, has_ylabel = false, has_grid = false;
+        
+        for (int i = 0; i < kw_count; ++i) {
+            const char* key = kw_keys[i]->id_name;
+            if (streq(key, "title")) {
+                has_title = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.title(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "xlabel")) {
+                has_xlabel = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.xlabel(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "ylabel")) {
+                has_ylabel = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.ylabel(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "grid")) {
+                has_grid = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.grid(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            }
+        }
+        
+        // Add default values if not provided
+        if (!has_title) {
+            print_indent(out, indent);
+            fprintf(out, "plt.title('Scatter Plot')\n");
+        }
+        if (!has_xlabel) {
+            print_indent(out, indent);
+            fprintf(out, "plt.xlabel('X-axis')\n");
+        }
+        if (!has_ylabel) {
+            print_indent(out, indent);
+            fprintf(out, "plt.ylabel('Y-axis')\n");
+        }
+        if (!has_grid) {
+            print_indent(out, indent);
+            fprintf(out, "plt.grid(True)\n");
+        }
+        
+        print_indent(out, indent);
+        fprintf(out, "plt.show()\n");
+    } else if (streq(func, "boxplot")) {
+        // Box plot visualization with extended parameters
+        fprintf(out, "plt.boxplot(");
+        for (int i = 0; i < pos_count; ++i) {
+            if (i > 0) fprintf(out, ", ");
+            generate_expr(pos_args[i], out, indent);
+        }
+        // Only add a comma if there is at least one keyword argument to emit
+        bool has_boxplot_kwarg = false;
+        bool has_notch = false, has_vert = false, has_patch_artist = false, has_tick_labels = false;
+        for (int i = 0; i < kw_count; ++i) {
+            const char* key = kw_keys[i]->id_name;
+            if (!(streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel") || streq(key, "grid"))) {
+                has_boxplot_kwarg = true;
+            }
+            if (streq(key, "notch")) has_notch = true;
+            if (streq(key, "vert")) has_vert = true;
+            if (streq(key, "patch_artist")) has_patch_artist = true;
+            if (streq(key, "tick_labels")) has_tick_labels = true;
+        }
+        if (has_boxplot_kwarg) {
+            fprintf(out, ", ");
+        }
+        for (int i = 0; i < kw_count; ++i) {
+            const char* key = kw_keys[i]->id_name;
+            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel") || streq(key, "grid")) continue;
+            fprintf(out, "%s=", key);
+            generate_expr(kw_vals[i], out, indent);
+            if (i < kw_count - 1) fprintf(out, ", ");
+        }
+        // Add default values if not provided
+        if (!has_notch) fprintf(out, ", notch=False");
+        if (!has_vert) fprintf(out, ", vert=True");
+        if (!has_patch_artist) fprintf(out, ", patch_artist=True");
+        if (!has_tick_labels) {
+            int n_labels = 1;
+            if (pos_count > 0 && pos_args[0]->type == NODE_VECTOR_LITERAL) {
+                // Count elements in the vector literal
+                ASTList* e = pos_args[0]->vector_literal.elements;
+                n_labels = 0;
+                while (e) {
+                    n_labels++;
+                    e = e->next;
+                }
+            } else {
+                n_labels = pos_count;
+            }
+            fprintf(out, ", tick_labels=[");
+            for (int i = 0; i < n_labels; ++i) {
+                if (i > 0) fprintf(out, ", ");
+                fprintf(out, "'Data %d'", i+1);
+            }
+            fprintf(out, "]");
+        }
+        fprintf(out, ")\n");
+        
+        // Add title, labels, and grid
+        bool has_title = false, has_xlabel = false, has_ylabel = false, has_grid = false;
+        
+        for (int i = 0; i < kw_count; ++i) {
+            const char* key = kw_keys[i]->id_name;
+            if (streq(key, "title")) {
+                has_title = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.title(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "xlabel")) {
+                has_xlabel = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.xlabel(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "ylabel")) {
+                has_ylabel = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.ylabel(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "grid")) {
+                has_grid = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.grid(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            }
+        }
+        
+        // Add default values if not provided
+        if (!has_title) {
+            print_indent(out, indent);
+            fprintf(out, "plt.title('Box Plot')\n");
+        }
+        if (!has_xlabel) {
+            print_indent(out, indent);
+            fprintf(out, "plt.xlabel('Groups')\n");
+        }
+        if (!has_ylabel) {
+            print_indent(out, indent);
+            fprintf(out, "plt.ylabel('Values')\n");
+        }
+        if (!has_grid) {
+            print_indent(out, indent);
+            fprintf(out, "plt.grid(True)\n");
+        }
+        
         print_indent(out, indent);
         fprintf(out, "plt.show()\n");
     } else if (streq(func, "timeline")) {
-        fprintf(out, "# Timeline visualization not implemented\n");
+        // Timeline visualization with extended parameters
+        fprintf(out, "plt.plot(");
+        for (int i = 0; i < pos_count; ++i) {
+            if (i > 0) fprintf(out, ", ");
+            generate_expr(pos_args[i], out, indent);
+        }
+        
+        // Add keyword arguments
+        bool has_color = false;
+        
+        // Add a comma after positional arguments if we have keyword arguments
+        if (kw_count > 0) {
+            fprintf(out, ", ");
+        }
+        
+        for (int i = 0; i < kw_count; ++i) {
+            const char* key = kw_keys[i]->id_name;
+            if (streq(key, "title") || streq(key, "xlabel") || streq(key, "ylabel") || 
+                streq(key, "grid") || streq(key, "autofmt_xdate")) continue;
+            
+            if (streq(key, "color")) has_color = true;
+            
+            fprintf(out, "%s=", key);
+            generate_expr(kw_vals[i], out, indent);
+            if (i < kw_count - 1) fprintf(out, ", ");
+        }
+        
+        // Add default values if not provided
+        if (!has_color) fprintf(out, ", color='purple'");
+        
+        fprintf(out, ")\n");
+        
+        // Add title, labels, grid, and autofmt_xdate
+        bool has_title = false, has_xlabel = false, has_ylabel = false, has_grid = false, has_autofmt_xdate = false;
+        
+        for (int i = 0; i < kw_count; ++i) {
+            const char* key = kw_keys[i]->id_name;
+            if (streq(key, "title")) {
+                has_title = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.title(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "xlabel")) {
+                has_xlabel = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.xlabel(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "ylabel")) {
+                has_ylabel = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.ylabel(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "grid")) {
+                has_grid = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.grid(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            } else if (streq(key, "autofmt_xdate")) {
+                has_autofmt_xdate = true;
+                print_indent(out, indent);
+                fprintf(out, "plt.gcf().autofmt_xdate(");
+                generate_expr(kw_vals[i], out, indent);
+                fprintf(out, ")\n");
+            }
+        }
+        
+        // Add default values if not provided
+        if (!has_title) {
+            print_indent(out, indent);
+            fprintf(out, "plt.title('Timeline')\n");
+        }
+        if (!has_xlabel) {
+            print_indent(out, indent);
+            fprintf(out, "plt.xlabel('Date')\n");
+        }
+        if (!has_ylabel) {
+            print_indent(out, indent);
+            fprintf(out, "plt.ylabel('Value')\n");
+        }
+        if (!has_grid) {
+            print_indent(out, indent);
+            fprintf(out, "plt.grid(True)\n");
+        }
+        if (!has_autofmt_xdate) {
+            print_indent(out, indent);
+            fprintf(out, "plt.gcf().autofmt_xdate()\n");
+        }
+        
+        print_indent(out, indent);
+        fprintf(out, "plt.show()\n");
     } else {
         fprintf(out, "# Unknown visualization: %s\n", func);
     }
@@ -383,7 +954,7 @@ void generate_expr(ASTNode* node, FILE* out, int indent) {
     if (!node) return;
     switch (node->type) {
         case NODE_NUMBER:
-            fprintf(out, "%g", node->num_value);
+            fprintf(out, "%.15g", node->num_value);
             break;
         case NODE_ID:
             fprintf(out, "%s", node->id_name);
