@@ -28,7 +28,7 @@ STRING     \"([^\"\\]|\\.)*\"
 "for"           { yycolumn += yyleng; return FOR; }
 "BEGIN_AUX"     { yycolumn += yyleng; return BEGIN_AUX; }
 "END_AUX"       { yycolumn += yyleng; return END_AUX; }
-
+"import"        { yycolumn += yyleng; return IMPORT; }
 
 "plot"          { return PLOT; }
 "histogram"     { return HISTOGRAM; }
@@ -37,7 +37,6 @@ STRING     \"([^\"\\]|\\.)*\"
 "piechart"      { return PIECHART; }
 "scatter"       { return SCATTER; }
 "boxplot"       { return BOXPLOT; }
-"timeline"      { return TIMELINE; }
 
 {ID}            { yylval.str = strdup(yytext); yycolumn += yyleng; return ID; }
 {NUMBER}        { yylval.num = atof(yytext); yycolumn += yyleng; return NUMBER; }

@@ -2,30 +2,22 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
 import matplotlib.pyplot as plt
 plot_counter = 1
-x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-y = [2.5, 4, 5.5, 4, 5, 6, 7, 8, 9, 10.5]
-z = [3, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-values = [4, 2.5, 2, 10]
-labels = ["Apples", "Bananas", "Cherries", "Dates"]
-plt.pie(values, labels=labels)
-plt.title('Pie Chart')
-plt.savefig(f'plot_{plot_counter}.png')
-plot_counter += 1
-plt.clf()
-plt.scatter(x, y, color='blue', marker='o', s=100, alpha=0.6)
-plt.title("Scatter Example")
-plt.xlabel("X")
-plt.ylabel("Y")
+import time
+_wizuall_run_id = int(time.time())
+import os
+os.makedirs('plots', exist_ok=True)
+import csv
+with open('data2.csv', 'r') as f:
+    reader = csv.DictReader(f)
+    _csv_data = list(reader)
+    if _csv_data:
+        for k in _csv_data[0].keys():
+            globals()[k] = [row[k] for row in _csv_data]
+plt.plot(x, y, color='blue', linestyle='-', marker='', markersize=5, linewidth=2)
+plt.title('Plot')
+plt.xlabel('X-axis')
+plt.ylabel('Y-axis')
 plt.grid(True)
-plt.savefig(f'plot_{plot_counter}.png')
-plot_counter += 1
-plt.clf()
-t_labels = ["hello", "World", "May"]
-plt.boxplot([x, y, z], tick_labels=t_labels, notch=False, vert=True, patch_artist=True)
-plt.title("Box Plot Example")
-plt.xlabel("Groups")
-plt.ylabel("Values")
-plt.grid(True)
-plt.savefig(f'plot_{plot_counter}.png')
+plt.savefig(f'plots/plot_{_wizuall_run_id}_{plot_counter}.png')
 plot_counter += 1
 plt.clf()

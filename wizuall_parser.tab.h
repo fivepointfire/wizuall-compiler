@@ -88,7 +88,8 @@ extern int yydebug;
     LBRACE = 294,
     RBRACE = 295,
     LBRACKET = 296,
-    RBRACKET = 297
+    RBRACKET = 297,
+    IMPORT = 298
   };
 #endif
 
@@ -103,7 +104,7 @@ union YYSTYPE
     struct ASTNode* ast;
     struct ASTList* list;
 
-#line 107 "wizuall_parser.tab.h"
+#line 108 "wizuall_parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

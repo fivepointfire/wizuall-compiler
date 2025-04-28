@@ -107,6 +107,13 @@ ASTNode* createStringNode(char* value) {
     return node;
 }
 
+ASTNode* createImportNode(const char* filename) {
+    ASTNode* node = malloc(sizeof(ASTNode));
+    node->type = NODE_IMPORT;
+    node->import.filename = strdup(filename);
+    return node;
+}
+
 // List creation functions
 
 ASTList* createASTList(ASTNode* node) {

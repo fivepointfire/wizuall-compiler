@@ -15,7 +15,8 @@ typedef enum {
     NODE_IF_ELSE,
     NODE_WHILE_LOOP,
     NODE_FOR_LOOP,
-    NODE_AUX_BLOCK
+    NODE_AUX_BLOCK,
+    NODE_IMPORT
 } NodeType;
 
 // Operators for binary expressions
@@ -95,6 +96,9 @@ typedef struct ASTNode {
             ASTList* statements;
         } program;
 
+        struct {           // For import statements
+            char* filename;
+        } import;
 
     };
 } ASTNode;
@@ -113,6 +117,7 @@ ASTNode* createIfElseNode(ASTNode* cond, ASTList* if_body, ASTList* else_body);
 ASTNode* createWhileNode(ASTNode* cond, ASTList* body);
 ASTNode* createForNode(ASTNode* init, ASTNode* cond, ASTNode* incr, ASTList* body);
 ASTNode* createAuxBlockNode(char* code);
+ASTNode* createImportNode(const char* filename);
 
 ASTList* createASTList(ASTNode* node);
 ASTList* appendASTList(ASTList* list, ASTNode* node);

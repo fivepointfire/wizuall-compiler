@@ -34,6 +34,7 @@ extern int yycolumn;
 %token LPAREN RPAREN
 %token LBRACE RBRACE
 %token LBRACKET RBRACKET
+%token IMPORT
 
 /* ----------  PRECEDENCE -------- */
 %left LT GT
@@ -45,6 +46,7 @@ extern int yycolumn;
 /* ----------  TYPES ------------ */
 %type <ast>  Program Statement Assignment ControlStructure FunctionCall VisualizationCall Expression Term Factor VectorLiteral VizArg
 %type <list> StatementList VectorElements ArgList ArgListOpt VizArgList VizArgListOpt
+%type <ast> ImportStatement
 
 %%   /* ---------- GRAMMAR ---------- */
 
@@ -58,10 +60,15 @@ StatementList
     ;
 
 Statement
-    : Assignment SEMICOLON
+    : ImportStatement
+    | Assignment SEMICOLON
     | ControlStructure
     | VisualizationCall SEMICOLON
     | FunctionCall SEMICOLON
+    ;
+
+ImportStatement
+    : IMPORT STRING SEMICOLON { $$ = createImportNode($2); }
     ;
 
 Assignment

@@ -1,20 +1,13 @@
-# WizuAll Compiler – Detailed Setup & Usage Guide
+# WizuAll Compiler – Quick Start & Usage Guide
 
 ## 1. Prerequisites
 
-You need a **Linux** system or **Windows Subsystem for Linux (WSL)**.  
-The following tools and libraries must be installed:
-
-- **Python 3** (for running generated code)
-- **pip** (Python package manager)
-- **make** (build tool)
-- **gcc** (C compiler)
-- **flex** (lexical analyzer generator)
-- **bison** (parser generator)
+- **Linux** or **WSL** environment
+- **Python 3** installed (`python3 --version`)
+- **pip** for Python 3 (`pip3 --version`)
+- **make**, **gcc**, **flex**, and **bison** installed
 
 ### Install System Packages
-
-Open your terminal and run:
 
 ```bash
 sudo apt update
@@ -22,8 +15,6 @@ sudo apt install python3 python3-pip make gcc flex bison
 ```
 
 ## 2. Install Required Python Libraries
-
-Install the Python libraries used by the generated code:
 
 ```bash
 pip3 install matplotlib numpy
@@ -40,39 +31,58 @@ make
 
 This will compile the WizuAll compiler executable.
 
-## 4. Compile a WizuAll Program
+## 4. Importing Data from JSON/CSV Files
+
+You can import data variables directly from JSON or CSV files using the following syntax at the top of your `.wzl` file:
+
+```wzl
+import "data.json";
+import "data.csv";
+```
+- After import, all top-level keys (for JSON) or columns (for CSV) become variables in your WizuAll code.
+- Example usage:
+  ```wzl
+  import "data.json";
+  plot(x, y);
+  ```
+- **Important:** Place all data files (e.g., `data.json`, `data.csv`) in the main project directory (the same directory where you run the compiler and where `output.py` is generated).
+
+## 5. Compile and Run a WizuAll Program
 
 To compile a WizuAll source file (for example, `examples/tc6.wzl`):
 
 ```bash
-./wizuall_compiler < examples/tc6.wzl
+./wizuall_compiler examples/tc6.wzl
 ```
 
-**What happens when you run this command:**
-- The compiler will print the Abstract Syntax Tree (AST) for your WizuAll program to the terminal.  
-  This helps you visualize the structure of your code and debug any issues.
-- After printing the AST, the compiler will generate a Python file named `output.py` in the same directory.
+This will generate a Python file named `output.py` in the main directory.
 
-## 5. Run the Generated Python Code
-
-Execute the generated Python code with:
+To run the generated Python code:
 
 ```bash
 python3 output.py
 ```
 
-## 6. What to Expect
+## 6. Plot Output Directory and File Naming
 
-- **AST Output:**  
+- All plot images are now saved in a subfolder called `plots/` in the main directory.
+- The images are named `plot_<runid>_<counter>.png` for each run, where `<runid>` is a unique timestamp for that run and `<counter>` is the plot number (e.g., `plot_1717171717_1.png`).
+- This ensures that plots from different runs will **not** overwrite each other.
+- The `plots` directory is created automatically if it does not exist.
+- **Tip:** You can easily identify which plots belong to which run by their `<runid>` value.
+
+## 7. What to Expect
+
+- **AST Output:**
   When you run the compiler, the AST for your WizuAll program will be displayed in the terminal before code generation.
-- **Plots:**  
-  If your WizuAll script contains visualization commands (like `plot`, `barchart`, `scatter`, etc.), the generated Python code will display the corresponding plots using matplotlib.
-- **Print Statements:**  
+- **Plots:**
+  All plots are saved as PNG files in the `plots/` directory.
+- **Print Statements:**
   Any `print` commands in your WizuAll script will output results directly to the terminal/command line.
-- **Warnings:**  
+- **Warnings:**
   Any matplotlib warnings (such as those about non-interactive backends) are automatically suppressed in the generated code.
 
-## 7. Example Workflow
+## 8. Example Workflow
 
 ```bash
 # 1. Build the compiler
@@ -80,17 +90,22 @@ make clean
 make
 
 # 2. Compile a WizuAll file (prints AST and generates output.py)
-./wizuall_compiler < examples/visualization_tests.wzl
+./wizuall_compiler < examples/tc6.wzl
 
 # 3. Run the generated Python code
 python3 output.py
+
+# 4. Check the plots/ directory for generated plot images
+ls plots/
 ```
-This Creates Your plots in the directory of your wzl code 
 
+## 9. Notes
 
-## 8. Notes
-
-- You can replace `examples/visualization_tests.wzl` with any other `.wzl` file you wish to compile.
+- You can replace `examples/tc6.wzl` with any other `.wzl` file you wish to compile.
 - Ensure all dependencies are installed before running the compiler or generated code.
 - No shell scripts are required; all steps are manual and transparent.
+
+---
+
+**Enjoy using WizuAll for your data analysis and visualization needs!**
 

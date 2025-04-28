@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <libgen.h> // for basename
 
 // Flags for imports and helpers
 static bool matplotlib_imported = false;
@@ -81,6 +82,8 @@ void scan_for_imports_and_helpers(ASTNode* node) {
             for (ASTList* s = node->for_loop.body; s; s = s->next)
                 scan_for_imports_and_helpers(s->node);
             break;
+        case NODE_IMPORT:
+            break;
         default:
             break;
     }
@@ -95,6 +98,7 @@ void emit_imports(FILE* out) {
     if (numpy_imported) fprintf(out, "import numpy as np\n");
     // Ensure plot_counter is defined before use
     fprintf(out, "plot_counter = 1\n");
+    fprintf(out, "import time\n_wizuall_run_id = int(time.time())\n");
 }
 
 void emit_helpers(FILE* out) {
@@ -336,7 +340,7 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
         }
         
         print_indent(out, indent);
-        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        fprintf(out, "plt.savefig(f'plots/plot_{_wizuall_run_id}_{plot_counter}.png')\n");
         print_indent(out, indent);
         fprintf(out, "plot_counter += 1\n");
         print_indent(out, indent);
@@ -442,7 +446,7 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
         }
         
         print_indent(out, indent);
-        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        fprintf(out, "plt.savefig(f'plots/plot_{_wizuall_run_id}_{plot_counter}.png')\n");
         print_indent(out, indent);
         fprintf(out, "plot_counter += 1\n");
         print_indent(out, indent);
@@ -542,7 +546,7 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
         }
         
         print_indent(out, indent);
-        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        fprintf(out, "plt.savefig(f'plots/plot_{_wizuall_run_id}_{plot_counter}.png')\n");
         print_indent(out, indent);
         fprintf(out, "plot_counter += 1\n");
         print_indent(out, indent);
@@ -629,7 +633,7 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
         }
         
         print_indent(out, indent);
-        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        fprintf(out, "plt.savefig(f'plots/plot_{_wizuall_run_id}_{plot_counter}.png')\n");
         print_indent(out, indent);
         fprintf(out, "plot_counter += 1\n");
         print_indent(out, indent);
@@ -676,7 +680,7 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
             fprintf(out, "plt.title('Pie Chart')\n");
         }
         print_indent(out, indent);
-        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        fprintf(out, "plt.savefig(f'plots/plot_{_wizuall_run_id}_{plot_counter}.png')\n");
         print_indent(out, indent);
         fprintf(out, "plot_counter += 1\n");
         print_indent(out, indent);
@@ -770,7 +774,7 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
         }
         
         print_indent(out, indent);
-        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        fprintf(out, "plt.savefig(f'plots/plot_{_wizuall_run_id}_{plot_counter}.png')\n");
         print_indent(out, indent);
         fprintf(out, "plot_counter += 1\n");
         print_indent(out, indent);
@@ -882,7 +886,7 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
         }
         
         print_indent(out, indent);
-        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        fprintf(out, "plt.savefig(f'plots/plot_{_wizuall_run_id}_{plot_counter}.png')\n");
         print_indent(out, indent);
         fprintf(out, "plot_counter += 1\n");
         print_indent(out, indent);
@@ -981,7 +985,7 @@ void generate_viz_call(const char* func, ASTList* args, FILE* out, int indent) {
         }
         
         print_indent(out, indent);
-        fprintf(out, "plt.savefig(f'plot_{plot_counter}.png')\n");
+        fprintf(out, "plt.savefig(f'plots/plot_{_wizuall_run_id}_{plot_counter}.png')\n");
         print_indent(out, indent);
         fprintf(out, "plot_counter += 1\n");
         print_indent(out, indent);
@@ -1051,10 +1055,12 @@ void generate_code(ASTNode* node, FILE* out, int indent) {
     if (!node) return;
     switch (node->type) {
         case NODE_PROGRAM:
-            // First pass: scan for needed imports/helpers
             scan_for_imports_and_helpers(node);
             emit_imports(out);
             emit_helpers(out);
+            // Add code to create 'plots' directory if it doesn't exist
+            fprintf(out, "import os\n");
+            fprintf(out, "os.makedirs('plots', exist_ok=True)\n");
             for (ASTList* s = node->program.statements; s; s = s->next)
                 generate_code(s->node, out, indent);
             break;
@@ -1103,6 +1109,49 @@ void generate_code(ASTNode* node, FILE* out, int indent) {
                 generate_code(s->node, out, indent + 1);
             generate_code(node->for_loop.increment, out, indent + 1);
             break;
+        case NODE_IMPORT: {
+            // Emit Python code to import data from JSON or CSV
+            const char* fname = node->import.filename;
+            int len = strlen(fname);
+            // Remove quotes if present
+            char clean_fname[256];
+            if (fname[0] == '"' && fname[len-1] == '"') {
+                strncpy(clean_fname, fname+1, len-2);
+                clean_fname[len-2] = '\0';
+            } else {
+                strncpy(clean_fname, fname, sizeof(clean_fname)-1);
+                clean_fname[sizeof(clean_fname)-1] = '\0';
+            }
+            if (len > 5 && strcmp(clean_fname + strlen(clean_fname) - 5, ".json") == 0) {
+                print_indent(out, indent);
+                fprintf(out, "import json\n");
+                print_indent(out, indent);
+                fprintf(out, "with open('%s', 'r') as f:\n", clean_fname);
+                print_indent(out, indent+1);
+                fprintf(out, "_data = json.load(f)\n");
+                print_indent(out, indent+1);
+                fprintf(out, "globals().update(_data)\n");
+            } else if (len > 4 && strcmp(clean_fname + strlen(clean_fname) - 4, ".csv") == 0) {
+                print_indent(out, indent);
+                fprintf(out, "import csv\n");
+                print_indent(out, indent);
+                fprintf(out, "with open('%s', 'r') as f:\n", clean_fname);
+                print_indent(out, indent+1);
+                fprintf(out, "reader = csv.DictReader(f)\n");
+                print_indent(out, indent+1);
+                fprintf(out, "_csv_data = list(reader)\n");
+                print_indent(out, indent+1);
+                fprintf(out, "if _csv_data:\n");
+                print_indent(out, indent+2);
+                fprintf(out, "for k in _csv_data[0].keys():\n");
+                print_indent(out, indent+3);
+                fprintf(out, "globals()[k] = [row[k] for row in _csv_data]\n");
+            } else {
+                print_indent(out, indent);
+                fprintf(out, "# Unsupported import file type: %s\n", fname);
+            }
+            break;
+        }
         default:
             print_indent(out, indent);
             fprintf(out, "# unsupported node\n");
