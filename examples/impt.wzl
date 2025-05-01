@@ -1,2 +1,2 @@
 import "data2.csv";
-plot(x,y);
+plot()

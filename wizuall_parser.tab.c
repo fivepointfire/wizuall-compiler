@@ -78,8 +78,9 @@ ASTNode* final_ast = NULL;
 // Add externs for line/column tracking
 extern int yylineno;
 extern int yycolumn;
+extern char* yytext;
 
-#line 83 "wizuall_parser.tab.c"
+#line 84 "wizuall_parser.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -175,14 +176,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 15 "grammar/wizuall_parser.y"
+#line 16 "grammar/wizuall_parser.y"
 
     double num;
     char* str;
     struct ASTNode* ast;
     struct ASTList* list;
 
-#line 186 "wizuall_parser.tab.c"
+#line 187 "wizuall_parser.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -561,12 +562,12 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    54,    54,    58,    59,    63,    64,    65,    66,    67,
-      71,    75,    79,    81,    83,    88,    92,    93,    94,    95,
-      96,    97,    98,    99,   103,   104,   105,   106,   107,   111,
-     112,   113,   117,   118,   119,   120,   121,   122,   126,   131,
-     132,   136,   137,   141,   142,   146,   147,   151,   152,   156,
-     161,   165
+       0,    55,    55,    59,    60,    64,    65,    66,    67,    68,
+      72,    76,    80,    82,    84,    89,    93,    94,    95,    96,
+      97,    98,    99,   100,   104,   105,   106,   107,   108,   112,
+     113,   114,   118,   119,   120,   121,   122,   123,   127,   132,
+     133,   137,   138,   142,   143,   147,   148,   152,   153,   157,
+     162,   166
 };
 #endif
 
@@ -1454,270 +1455,270 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 54 "grammar/wizuall_parser.y"
+#line 55 "grammar/wizuall_parser.y"
                                    { final_ast = createProgramNode((yyvsp[0].list)); }
-#line 1460 "wizuall_parser.tab.c"
+#line 1461 "wizuall_parser.tab.c"
     break;
 
   case 3:
-#line 58 "grammar/wizuall_parser.y"
+#line 59 "grammar/wizuall_parser.y"
                                        { (yyval.list) = createASTList((yyvsp[0].ast)); }
-#line 1466 "wizuall_parser.tab.c"
+#line 1467 "wizuall_parser.tab.c"
     break;
 
   case 4:
-#line 59 "grammar/wizuall_parser.y"
+#line 60 "grammar/wizuall_parser.y"
                                        { (yyval.list) = appendASTList((yyvsp[-1].list), (yyvsp[0].ast)); }
-#line 1472 "wizuall_parser.tab.c"
+#line 1473 "wizuall_parser.tab.c"
     break;
 
   case 10:
-#line 71 "grammar/wizuall_parser.y"
+#line 72 "grammar/wizuall_parser.y"
                               { (yyval.ast) = createImportNode((yyvsp[-1].str)); }
-#line 1478 "wizuall_parser.tab.c"
+#line 1479 "wizuall_parser.tab.c"
     break;
 
   case 11:
-#line 75 "grammar/wizuall_parser.y"
+#line 76 "grammar/wizuall_parser.y"
                                    { (yyval.ast) = createAssignmentNode((yyvsp[-2].str), (yyvsp[0].ast)); }
-#line 1484 "wizuall_parser.tab.c"
+#line 1485 "wizuall_parser.tab.c"
     break;
 
   case 12:
-#line 80 "grammar/wizuall_parser.y"
+#line 81 "grammar/wizuall_parser.y"
         { (yyval.ast) = createIfElseNode((yyvsp[-8].ast), (yyvsp[-5].list), (yyvsp[-1].list)); }
-#line 1490 "wizuall_parser.tab.c"
+#line 1491 "wizuall_parser.tab.c"
     break;
 
   case 13:
-#line 82 "grammar/wizuall_parser.y"
+#line 83 "grammar/wizuall_parser.y"
         { (yyval.ast) = createWhileNode((yyvsp[-4].ast), (yyvsp[-1].list)); }
-#line 1496 "wizuall_parser.tab.c"
+#line 1497 "wizuall_parser.tab.c"
     break;
 
   case 14:
-#line 84 "grammar/wizuall_parser.y"
+#line 85 "grammar/wizuall_parser.y"
         { (yyval.ast) = createForNode((yyvsp[-8].ast), (yyvsp[-6].ast), (yyvsp[-4].ast), (yyvsp[-1].list)); }
-#line 1502 "wizuall_parser.tab.c"
+#line 1503 "wizuall_parser.tab.c"
     break;
 
   case 15:
-#line 88 "grammar/wizuall_parser.y"
+#line 89 "grammar/wizuall_parser.y"
                                    { (yyval.ast) = createFunctionCallNode((yyvsp[-3].str), (yyvsp[-1].list)); }
-#line 1508 "wizuall_parser.tab.c"
+#line 1509 "wizuall_parser.tab.c"
     break;
 
   case 16:
-#line 92 "grammar/wizuall_parser.y"
+#line 93 "grammar/wizuall_parser.y"
                                             { (yyval.ast) = createVizCallNode("plot",      (yyvsp[-1].list)); }
-#line 1514 "wizuall_parser.tab.c"
+#line 1515 "wizuall_parser.tab.c"
     break;
 
   case 17:
-#line 93 "grammar/wizuall_parser.y"
+#line 94 "grammar/wizuall_parser.y"
                                             { (yyval.ast) = createVizCallNode("histogram", (yyvsp[-1].list)); }
-#line 1520 "wizuall_parser.tab.c"
+#line 1521 "wizuall_parser.tab.c"
     break;
 
   case 18:
-#line 94 "grammar/wizuall_parser.y"
+#line 95 "grammar/wizuall_parser.y"
                                             { (yyval.ast) = createVizCallNode("heatmap",   (yyvsp[-1].list)); }
-#line 1526 "wizuall_parser.tab.c"
+#line 1527 "wizuall_parser.tab.c"
     break;
 
   case 19:
-#line 95 "grammar/wizuall_parser.y"
+#line 96 "grammar/wizuall_parser.y"
                                             { (yyval.ast) = createVizCallNode("barchart",  (yyvsp[-1].list)); }
-#line 1532 "wizuall_parser.tab.c"
+#line 1533 "wizuall_parser.tab.c"
     break;
 
   case 20:
-#line 96 "grammar/wizuall_parser.y"
+#line 97 "grammar/wizuall_parser.y"
                                             { (yyval.ast) = createVizCallNode("piechart",  (yyvsp[-1].list)); }
-#line 1538 "wizuall_parser.tab.c"
+#line 1539 "wizuall_parser.tab.c"
     break;
 
   case 21:
-#line 97 "grammar/wizuall_parser.y"
+#line 98 "grammar/wizuall_parser.y"
                                             { (yyval.ast) = createVizCallNode("scatter",   (yyvsp[-1].list)); }
-#line 1544 "wizuall_parser.tab.c"
+#line 1545 "wizuall_parser.tab.c"
     break;
 
   case 22:
-#line 98 "grammar/wizuall_parser.y"
+#line 99 "grammar/wizuall_parser.y"
                                             { (yyval.ast) = createVizCallNode("boxplot",   (yyvsp[-1].list)); }
-#line 1550 "wizuall_parser.tab.c"
+#line 1551 "wizuall_parser.tab.c"
     break;
 
   case 23:
-#line 99 "grammar/wizuall_parser.y"
+#line 100 "grammar/wizuall_parser.y"
                                             { (yyval.ast) = createVizCallNode("timeline",  (yyvsp[-1].list)); }
-#line 1556 "wizuall_parser.tab.c"
+#line 1557 "wizuall_parser.tab.c"
     break;
 
   case 24:
-#line 103 "grammar/wizuall_parser.y"
+#line 104 "grammar/wizuall_parser.y"
                                    { (yyval.ast) = createBinaryOpNode(OP_PLUS , (yyvsp[-2].ast), (yyvsp[0].ast)); }
-#line 1562 "wizuall_parser.tab.c"
+#line 1563 "wizuall_parser.tab.c"
     break;
 
   case 25:
-#line 104 "grammar/wizuall_parser.y"
+#line 105 "grammar/wizuall_parser.y"
                                     { (yyval.ast) = createBinaryOpNode(OP_MINUS, (yyvsp[-2].ast), (yyvsp[0].ast)); }
-#line 1568 "wizuall_parser.tab.c"
+#line 1569 "wizuall_parser.tab.c"
     break;
 
   case 26:
-#line 105 "grammar/wizuall_parser.y"
+#line 106 "grammar/wizuall_parser.y"
                                     { (yyval.ast) = createBinaryOpNode(OP_LT, (yyvsp[-2].ast), (yyvsp[0].ast)); }
-#line 1574 "wizuall_parser.tab.c"
+#line 1575 "wizuall_parser.tab.c"
     break;
 
   case 27:
-#line 106 "grammar/wizuall_parser.y"
+#line 107 "grammar/wizuall_parser.y"
                                     { (yyval.ast) = createBinaryOpNode(OP_GT, (yyvsp[-2].ast), (yyvsp[0].ast)); }
-#line 1580 "wizuall_parser.tab.c"
+#line 1581 "wizuall_parser.tab.c"
     break;
 
   case 29:
-#line 111 "grammar/wizuall_parser.y"
+#line 112 "grammar/wizuall_parser.y"
                                     { (yyval.ast) = createBinaryOpNode(OP_TIMES, (yyvsp[-2].ast), (yyvsp[0].ast)); }
-#line 1586 "wizuall_parser.tab.c"
+#line 1587 "wizuall_parser.tab.c"
     break;
 
   case 30:
-#line 112 "grammar/wizuall_parser.y"
+#line 113 "grammar/wizuall_parser.y"
                                     { (yyval.ast) = createBinaryOpNode(OP_DIVIDE, (yyvsp[-2].ast), (yyvsp[0].ast)); }
-#line 1592 "wizuall_parser.tab.c"
+#line 1593 "wizuall_parser.tab.c"
     break;
 
   case 32:
-#line 117 "grammar/wizuall_parser.y"
+#line 118 "grammar/wizuall_parser.y"
                                     { (yyval.ast) = createNumberNode((yyvsp[0].num)); }
-#line 1598 "wizuall_parser.tab.c"
+#line 1599 "wizuall_parser.tab.c"
     break;
 
   case 33:
-#line 118 "grammar/wizuall_parser.y"
+#line 119 "grammar/wizuall_parser.y"
                                     { (yyval.ast) = createIdNode((yyvsp[0].str)); }
-#line 1604 "wizuall_parser.tab.c"
+#line 1605 "wizuall_parser.tab.c"
     break;
 
   case 34:
-#line 119 "grammar/wizuall_parser.y"
+#line 120 "grammar/wizuall_parser.y"
                                     { (yyval.ast) = createStringNode((yyvsp[0].str)); }
-#line 1610 "wizuall_parser.tab.c"
+#line 1611 "wizuall_parser.tab.c"
     break;
 
   case 35:
-#line 120 "grammar/wizuall_parser.y"
+#line 121 "grammar/wizuall_parser.y"
                                     { (yyval.ast) = (yyvsp[0].ast); }
-#line 1616 "wizuall_parser.tab.c"
+#line 1617 "wizuall_parser.tab.c"
     break;
 
   case 36:
-#line 121 "grammar/wizuall_parser.y"
+#line 122 "grammar/wizuall_parser.y"
                                     { (yyval.ast) = (yyvsp[0].ast); }
-#line 1622 "wizuall_parser.tab.c"
+#line 1623 "wizuall_parser.tab.c"
     break;
 
   case 37:
-#line 122 "grammar/wizuall_parser.y"
+#line 123 "grammar/wizuall_parser.y"
                                     { (yyval.ast) = (yyvsp[-1].ast); }
-#line 1628 "wizuall_parser.tab.c"
+#line 1629 "wizuall_parser.tab.c"
     break;
 
   case 38:
-#line 126 "grammar/wizuall_parser.y"
+#line 127 "grammar/wizuall_parser.y"
                                        { (yyval.ast) = createVectorNode((yyvsp[-1].list)); }
-#line 1634 "wizuall_parser.tab.c"
+#line 1635 "wizuall_parser.tab.c"
     break;
 
   case 39:
-#line 131 "grammar/wizuall_parser.y"
+#line 132 "grammar/wizuall_parser.y"
                                            { (yyval.list) = createASTList((yyvsp[0].ast)); }
-#line 1640 "wizuall_parser.tab.c"
+#line 1641 "wizuall_parser.tab.c"
     break;
 
   case 40:
-#line 132 "grammar/wizuall_parser.y"
+#line 133 "grammar/wizuall_parser.y"
                                            { (yyval.list) = appendASTList((yyvsp[-2].list), (yyvsp[0].ast)); }
-#line 1646 "wizuall_parser.tab.c"
+#line 1647 "wizuall_parser.tab.c"
     break;
 
   case 41:
-#line 136 "grammar/wizuall_parser.y"
+#line 137 "grammar/wizuall_parser.y"
                                      { (yyval.list) = (yyvsp[0].list); }
-#line 1652 "wizuall_parser.tab.c"
+#line 1653 "wizuall_parser.tab.c"
     break;
 
   case 42:
-#line 137 "grammar/wizuall_parser.y"
+#line 138 "grammar/wizuall_parser.y"
                                      { (yyval.list) = NULL; }
-#line 1658 "wizuall_parser.tab.c"
+#line 1659 "wizuall_parser.tab.c"
     break;
 
   case 43:
-#line 141 "grammar/wizuall_parser.y"
+#line 142 "grammar/wizuall_parser.y"
                                      { (yyval.list) = createASTList((yyvsp[0].ast)); }
-#line 1664 "wizuall_parser.tab.c"
+#line 1665 "wizuall_parser.tab.c"
     break;
 
   case 44:
-#line 142 "grammar/wizuall_parser.y"
+#line 143 "grammar/wizuall_parser.y"
                                      { (yyval.list) = appendASTList((yyvsp[-2].list), (yyvsp[0].ast)); }
-#line 1670 "wizuall_parser.tab.c"
+#line 1671 "wizuall_parser.tab.c"
     break;
 
   case 45:
-#line 146 "grammar/wizuall_parser.y"
+#line 147 "grammar/wizuall_parser.y"
                                      { (yyval.list) = (yyvsp[0].list); }
-#line 1676 "wizuall_parser.tab.c"
+#line 1677 "wizuall_parser.tab.c"
     break;
 
   case 46:
-#line 147 "grammar/wizuall_parser.y"
+#line 148 "grammar/wizuall_parser.y"
                                      { (yyval.list) = NULL; }
-#line 1682 "wizuall_parser.tab.c"
+#line 1683 "wizuall_parser.tab.c"
     break;
 
   case 47:
-#line 151 "grammar/wizuall_parser.y"
+#line 152 "grammar/wizuall_parser.y"
                                      { (yyval.list) = createASTList((yyvsp[0].ast)); }
-#line 1688 "wizuall_parser.tab.c"
+#line 1689 "wizuall_parser.tab.c"
     break;
 
   case 48:
-#line 152 "grammar/wizuall_parser.y"
+#line 153 "grammar/wizuall_parser.y"
                                      { (yyval.list) = appendASTList((yyvsp[-2].list), (yyvsp[0].ast)); }
-#line 1694 "wizuall_parser.tab.c"
+#line 1695 "wizuall_parser.tab.c"
     break;
 
   case 49:
-#line 157 "grammar/wizuall_parser.y"
+#line 158 "grammar/wizuall_parser.y"
         {   ASTNode* key = createIdNode((yyvsp[-2].str));
             ASTNode* val = createStringNode((yyvsp[0].str));
             (yyval.ast) = createBinaryOpNode(OP_ASSIGN, key, val);
         }
-#line 1703 "wizuall_parser.tab.c"
+#line 1704 "wizuall_parser.tab.c"
     break;
 
   case 50:
-#line 162 "grammar/wizuall_parser.y"
+#line 163 "grammar/wizuall_parser.y"
         {   ASTNode* key = createIdNode((yyvsp[-2].str));
             (yyval.ast) = createBinaryOpNode(OP_ASSIGN, key, (yyvsp[0].ast));
         }
-#line 1711 "wizuall_parser.tab.c"
+#line 1712 "wizuall_parser.tab.c"
     break;
 
   case 51:
-#line 165 "grammar/wizuall_parser.y"
+#line 166 "grammar/wizuall_parser.y"
                                      { (yyval.ast) = (yyvsp[0].ast); }
-#line 1717 "wizuall_parser.tab.c"
+#line 1718 "wizuall_parser.tab.c"
     break;
 
 
-#line 1721 "wizuall_parser.tab.c"
+#line 1722 "wizuall_parser.tab.c"
 
       default: break;
     }
@@ -1949,12 +1950,13 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 168 "grammar/wizuall_parser.y"
+#line 169 "grammar/wizuall_parser.y"
   /* ----------  C code section ---------- */
 
 void yyerror(const char *s) {
-    extern char* yytext;
-    extern int yylineno, yycolumn;
-    fprintf(stderr, "Parse error: %s at '%s' (line %d, column %d)\n", s, yytext, yylineno, yycolumn);
+    fprintf(stderr, "Parse error at line %d, column %d: %s\n", yylineno, yycolumn, s);
+    if (yytext) {
+        fprintf(stderr, "Near token: '%s'\n", yytext);
+    }
 }
     

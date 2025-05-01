@@ -8,6 +8,7 @@
 extern YYSTYPE yylval;
 
 // Add line and column tracking
+
 int yycolumn = 1;
 %}
 
@@ -19,49 +20,103 @@ STRING     \"([^\"\\]|\\.)*\"
 
 %%
 
+\r\n            { yylineno++; yycolumn = 1; }
 \n              { yylineno++; yycolumn = 1; }
-[ \t\r]+        { yycolumn += yyleng; }
+\r              { yylineno++; yycolumn = 1; }
+[ \t]+          { yycolumn += yyleng; }
 
-"if"            { yycolumn += yyleng; return IF; }
-"else"          { yycolumn += yyleng; return ELSE; }
-"while"         { yycolumn += yyleng; return WHILE; }
-"for"           { yycolumn += yyleng; return FOR; }
-"BEGIN_AUX"     { yycolumn += yyleng; return BEGIN_AUX; }
-"END_AUX"       { yycolumn += yyleng; return END_AUX; }
-"import"        { yycolumn += yyleng; return IMPORT; }
+"if"            { yylval.str = strdup(yytext); yycolumn += yyleng; return IF; }
+"else"          { yylval.str = strdup(yytext); yycolumn += yyleng; return ELSE; }
+"while"         { yylval.str = strdup(yytext); yycolumn += yyleng; return WHILE; }
+"for"           { yylval.str = strdup(yytext); yycolumn += yyleng; return FOR; }
+"BEGIN_AUX"     { yylval.str = strdup(yytext); yycolumn += yyleng; return BEGIN_AUX; }
+"END_AUX"       { yylval.str = strdup(yytext); yycolumn += yyleng; return END_AUX; }
+"import"        { yylval.str = strdup(yytext); yycolumn += yyleng; return IMPORT; }
 
-"plot"          { return PLOT; }
-"histogram"     { return HISTOGRAM; }
-"heatmap"       { return HEATMAP; }
-"barchart"      { return BARCHART; }
-"piechart"      { return PIECHART; }
-"scatter"       { return SCATTER; }
-"boxplot"       { return BOXPLOT; }
+"plot"          { yylval.str = strdup(yytext); yycolumn += yyleng; return PLOT; }
+"histogram"     { yylval.str = strdup(yytext); yycolumn += yyleng; return HISTOGRAM; }
+"heatmap"       { yylval.str = strdup(yytext); yycolumn += yyleng; return HEATMAP; }
+"barchart"      { yylval.str = strdup(yytext); yycolumn += yyleng; return BARCHART; }
+"piechart"      { yylval.str = strdup(yytext); yycolumn += yyleng; return PIECHART; }
+"scatter"       { yylval.str = strdup(yytext); yycolumn += yyleng; return SCATTER; }
+"boxplot"       { yylval.str = strdup(yytext); yycolumn += yyleng; return BOXPLOT; }
 
 {ID}            { yylval.str = strdup(yytext); yycolumn += yyleng; return ID; }
 {NUMBER}        { yylval.num = atof(yytext); yycolumn += yyleng; return NUMBER; }
-{STRING}        { yylval.str = strdup(yytext); yycolumn += yyleng; return STRING; }
+{STRING}        {
+    int i;
+    for (i = 0; i < yyleng; i++) {
+        if (yytext[i] == '\n') {
+            yylineno++;
+            yycolumn = 1;
+        } else if (yytext[i] == '\r') {
+            if (i+1 < yyleng && yytext[i+1] == '\n') {
+                i++;
+            }
+            yylineno++;
+            yycolumn = 1;
+        } else {
+            yycolumn++;
+        }
+    }
+    yylval.str = strdup(yytext);
+    return STRING;
+}
 
-"+"             { yycolumn += yyleng; return PLUS; }
-"-"             { yycolumn += yyleng; return MINUS; }
-"*"             { yycolumn += yyleng; return TIMES; }
-"/"             { yycolumn += yyleng; return DIVIDE; }
-"="             { yycolumn += yyleng; return ASSIGN; }
-","             { yycolumn += yyleng; return COMMA; }
-";"             { yycolumn += yyleng; return SEMICOLON; }
-"("             { yycolumn += yyleng; return LPAREN; }
-")"             { yycolumn += yyleng; return RPAREN; }
-"{"             { yycolumn += yyleng; return LBRACE; }
-"}"             { yycolumn += yyleng; return RBRACE; }
-"["             { yycolumn += yyleng; return LBRACKET; }
-"]"             { yycolumn += yyleng; return RBRACKET; }
-"<"             { yycolumn += yyleng; return LT; }
-">"             { yycolumn += yyleng; return GT; }
+"+"             { yylval.str = strdup(yytext); yycolumn += yyleng; return PLUS; }
+"-"             { yylval.str = strdup(yytext); yycolumn += yyleng; return MINUS; }
+"*"             { yylval.str = strdup(yytext); yycolumn += yyleng; return TIMES; }
+"/"             { yylval.str = strdup(yytext); yycolumn += yyleng; return DIVIDE; }
+"="             { yylval.str = strdup(yytext); yycolumn += yyleng; return ASSIGN; }
+","             { yylval.str = strdup(yytext); yycolumn += yyleng; return COMMA; }
+";"             { yylval.str = strdup(yytext); yycolumn += yyleng; return SEMICOLON; }
+"("             { yylval.str = strdup(yytext); yycolumn += yyleng; return LPAREN; }
+")"             { yylval.str = strdup(yytext); yycolumn += yyleng; return RPAREN; }
+"{"             { yylval.str = strdup(yytext); yycolumn += yyleng; return LBRACE; }
+"}"             { yylval.str = strdup(yytext); yycolumn += yyleng; return RBRACE; }
+"["             { yylval.str = strdup(yytext); yycolumn += yyleng; return LBRACKET; }
+"]"             { yylval.str = strdup(yytext); yycolumn += yyleng; return RBRACKET; }
+"<"             { yylval.str = strdup(yytext); yycolumn += yyleng; return LT; }
+">"             { yylval.str = strdup(yytext); yycolumn += yyleng; return GT; }
 
-[ \t\r\n]+      ;         
-"//".*          ;          
+[ \t\n\r]+      ;         
+"//".*          {
+    int i;
+    for (i = 0; i < yyleng; i++) {
+        if (yytext[i] == '\n') {
+            yylineno++;
+            yycolumn = 1;
+        } else if (yytext[i] == '\r') {
+            if (i+1 < yyleng && yytext[i+1] == '\n') {
+                i++;
+            }
+            yylineno++;
+            yycolumn = 1;
+        } else {
+            yycolumn++;
+        }
+    }
+    /* skip comment */
+}
 
-.               { yycolumn += yyleng; /* Skip any unknown single characters */ }
+.               {
+    int i;
+    for (i = 0; i < yyleng; i++) {
+        if (yytext[i] == '\n') {
+            yylineno++;
+            yycolumn = 1;
+        } else if (yytext[i] == '\r') {
+            if (i+1 < yyleng && yytext[i+1] == '\n') {
+                i++;
+            }
+            yylineno++;
+            yycolumn = 1;
+        } else {
+            yycolumn++;
+        }
+    }
+    /* Skip any unknown single characters */
+}
 
 %%
 

@@ -9,6 +9,7 @@ ASTNode* final_ast = NULL;
 // Add externs for line/column tracking
 extern int yylineno;
 extern int yycolumn;
+extern char* yytext;
 %}
 
 /* ----------  UNION  ---------- */
@@ -168,8 +169,9 @@ VizArg
 %%  /* ----------  C code section ---------- */
 
 void yyerror(const char *s) {
-    extern char* yytext;
-    extern int yylineno, yycolumn;
-    fprintf(stderr, "Parse error: %s at '%s' (line %d, column %d)\n", s, yytext, yylineno, yycolumn);
+    fprintf(stderr, "Parse error at line %d, column %d: %s\n", yylineno, yycolumn, s);
+    if (yytext) {
+        fprintf(stderr, "Near token: '%s'\n", yytext);
+    }
 }
     

@@ -1,23 +1,19 @@
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
-import matplotlib.pyplot as plt
 plot_counter = 1
 import time
 _wizuall_run_id = int(time.time())
 import os
 os.makedirs('plots', exist_ok=True)
-import csv
-with open('data2.csv', 'r') as f:
-    reader = csv.DictReader(f)
-    _csv_data = list(reader)
-    if _csv_data:
-        for k in _csv_data[0].keys():
-            globals()[k] = [row[k] for row in _csv_data]
-plt.plot(x, y, color='blue', linestyle='-', marker='', markersize=5, linewidth=2)
-plt.title('Plot')
-plt.xlabel('X-axis')
-plt.ylabel('Y-axis')
-plt.grid(True)
-plt.savefig(f'plots/plot_{_wizuall_run_id}_{plot_counter}.png')
-plot_counter += 1
-plt.clf()
+a = [1, 2, 3, 4, 5]
+b = [10, 20, 30, 40, 50]
+sum_a = (sum(a) / len(a)) + (sum(b) / len(b))
+sorted_b = sorted(b)
+reversed_a = list(reversed(a))
+sliced_b = b[1:4]
+transposed = list(map(list, zip(*[[1, 2], [3, 4]])))
+print("sum_a:", sum_a)
+print("sorted_b:", sorted_b)
+print("reversed_a:", reversed_a)
+print("sliced_b:", sliced_b)
+print("transposed:", transposed)

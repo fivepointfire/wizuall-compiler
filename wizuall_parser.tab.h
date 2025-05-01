@@ -97,7 +97,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 15 "grammar/wizuall_parser.y"
+#line 16 "grammar/wizuall_parser.y"
 
     double num;
     char* str;
